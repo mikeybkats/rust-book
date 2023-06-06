@@ -74,6 +74,10 @@ fn make_fibonacci(number: u128) -> u128 {
             break 1;
         }
 
+        if number == 2 {
+            break 1;
+        }
+
         let fib_n = fn_1 + fn_2;
         fn_1 = fn_2;
         fn_2 = fib_n;
