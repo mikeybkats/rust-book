@@ -24,6 +24,9 @@ pub mod employees {
         if split_command[0].to_lowercase() != "add" {
             return Err(String::from("not an add command"));
         }
+        if split_command[0].to_lowercase() == "end" {
+            return Ok((String::from("end"), String::from("end")));
+        }
         if !DEPARTMENTS.contains(&split_command[3].to_lowercase().as_str()) {
             return Err(String::from("not a department"));
         }
@@ -42,8 +45,6 @@ pub mod employees {
         }
     }
 
-    pub fn print_department() {}
-
     pub fn print_company(company: &HashMap<String, Vec<String>>) {
         for (key, value) in company {
             println!("{}: {:?}", key, value)
@@ -57,31 +58,29 @@ pub mod employees {
             company.insert(String::from(department), Vec::new());
         }
 
+        // add all the current employees
         for command in CURRENT_EMPLOYEES {
             match parse_command(command) {
-                Ok((name, department)) => add_employee(&name, &department, &mut company),
-                Err(_) => continue,
+                Ok((name, department)) => {
+                    if name == "end" && department == "end" {
+                        println!("goodbye");
+                        break;
+                    }
+                    add_employee(&name, &department, &mut company);
+                }
+                Err(err) => {
+                    println!("{}", err);
+                }
             };
         }
 
         return company;
     }
 
-    // fn test_add_employee() {
-    //     let mut company_directory = make_company();
-    //     add_employee("bob", "engineering", &mut company_directory);
-
-    //     for (key, value) in &company_directory {
-    //         println!("{}: {:?}", key, value)
-    //     }
-    // }
-
     pub fn start_cli() {
-        let company_directory = make_company();
+        let mut company_directory = make_company();
 
         loop {
-            print_company(&company_directory);
-
             println!("Type 'add employeeName to departmentName' to add an employee");
 
             let mut command = String::new();
@@ -90,10 +89,15 @@ pub mod employees {
                 .read_line(&mut command)
                 .expect("Failed to read line");
 
-            let command = match parse_command(command.as_str()) {
-                Ok(value) => value,
-                Err(error) => (error, String::new()),
-            };
+            match parse_command(command.as_str().trim()) {
+                Ok((name, department)) => {
+                    add_employee(&name, &department, &mut company_directory);
+                    print_company(&company_directory);
+                }
+                Err(err) => {
+                    println!("{}", err);
+                }
+            }
         }
     }
 }
