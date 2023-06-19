@@ -5,7 +5,7 @@ pub mod employees {
 
     pub const DEPARTMENTS: [&str; 5] = ["engineering", "design", "business", "sales", "research"];
 
-    pub const KEY_WORDS: [&str; 2] = ["Add", "Remove"];
+    pub const KEY_WORDS: [&str; 5] = ["add", "remove", "print", "end", "get"];
 
     pub const CURRENT_EMPLOYEES: [&str; 9] = [
         "Add Sally to engineering",
@@ -19,22 +19,39 @@ pub mod employees {
         "Add Eric to research",
     ];
 
-    pub fn parse_command(command: &str) -> Result<(String, String), String> {
-        let split_command: Vec<&str> = command.split(" ").collect();
-        if split_command[0].to_lowercase() != "add" {
-            return Err(String::from("not an add command"));
-        }
-        if split_command[0].to_lowercase() == "end" {
-            return Ok((String::from("end"), String::from("end")));
-        }
-        if !DEPARTMENTS.contains(&split_command[3].to_lowercase().as_str()) {
+    pub fn handle_add_case(command: &Vec<&str>) -> Result<String, String> {
+        if !DEPARTMENTS.contains(&command[3].to_lowercase().as_str()) {
             return Err(String::from("not a department"));
         }
+        return Ok(command[0].to_string());
+    }
 
-        return Ok((
-            String::from(split_command[1]),
-            String::from(split_command[3]),
-        ));
+    pub fn handle_get_case(command: &Vec<&str>) -> Result<String, String> {
+        if !DEPARTMENTS.contains(&command[1].to_lowercase().as_str()) {
+            return Err(String::from("not a department"));
+        }
+        return Ok(command[0].to_string());
+    }
+
+    pub fn handle_print_case() -> Result<String, String> {
+        return Ok("print".to_string());
+    }
+
+    pub fn parse_command(command: &Vec<&str>) -> Result<String, String> {
+        let command_zero = command[0].to_lowercase();
+
+        if !KEY_WORDS.contains(&command_zero.as_str()) {
+            return Err(String::from("not an add command"));
+        }
+
+        match command_zero.as_str() {
+            "end" => Ok(command_zero),
+            "exit" => Ok(command_zero),
+            "add" => handle_add_case(command),
+            "get" => handle_get_case(command),
+            "print" => handle_print_case(),
+            _ => Err(String::from("command not found")),
+        }
     }
 
     pub fn add_employee(name: &str, department: &str, company: &mut HashMap<String, Vec<String>>) {
@@ -42,6 +59,16 @@ pub mod employees {
         match target_department {
             Some(val) => val.push(name.to_string()),
             None => println!("There is no value"),
+        }
+    }
+
+    pub fn print_department(company: &HashMap<String, Vec<String>>, department: &str) {
+        match company.get(&department.to_lowercase()) {
+            Some(value) => {
+                println!("{:?}", value)
+                //
+            }
+            None => println!("no entry"),
         }
     }
 
@@ -60,13 +87,14 @@ pub mod employees {
 
         // add all the current employees
         for command in CURRENT_EMPLOYEES {
-            match parse_command(command) {
-                Ok((name, department)) => {
-                    if name == "end" && department == "end" {
+            let split_command: Vec<&str> = command.trim().split(" ").collect();
+            match parse_command(&split_command) {
+                Ok(value) => {
+                    if value == "end" {
                         println!("goodbye");
                         break;
                     }
-                    add_employee(&name, &department, &mut company);
+                    add_employee(&split_command[1], &split_command[3], &mut company);
                 }
                 Err(err) => {
                     println!("{}", err);
@@ -89,11 +117,21 @@ pub mod employees {
                 .read_line(&mut command)
                 .expect("Failed to read line");
 
-            match parse_command(command.as_str().trim()) {
-                Ok((name, department)) => {
-                    add_employee(&name, &department, &mut company_directory);
-                    print_company(&company_directory);
-                }
+            let split_command: Vec<&str> = command.as_str().trim().split(" ").collect();
+
+            match parse_command(&split_command) {
+                Ok(value) => match value.as_str() {
+                    "end" => {
+                        println!("Goodbye");
+                        break;
+                    }
+                    "add" => {
+                        add_employee(&split_command[1], &split_command[3], &mut company_directory)
+                    }
+                    "print" => print_company(&company_directory),
+                    "get" => print_department(&company_directory, split_command[1]),
+                    _ => println!("not a command"),
+                },
                 Err(err) => {
                     println!("{}", err);
                 }
