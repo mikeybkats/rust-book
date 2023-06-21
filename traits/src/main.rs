@@ -1,6 +1,6 @@
 pub mod aggregator;
 
-use aggregator::{Summary, Tweet};
+use aggregator::{notify, returns_summarizable, Summary, Tweet};
 
 fn main() {
     let tweet = Tweet {
@@ -11,4 +11,10 @@ fn main() {
     };
 
     println!("1 new tweet: {}", tweet.summarize());
+
+    notify(&tweet);
+
+    let new_tweet = returns_summarizable();
+
+    println!("Another new tweet: {}", new_tweet.summarize());
 }

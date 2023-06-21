@@ -27,3 +27,18 @@ impl Summary for Tweet {
         format!("{}: {}", self.username, self.content)
     }
 }
+
+// use a trait as an parameter type
+pub fn notify(item: &impl Summary) {
+    println!("Breaking news! {}", item.summarize());
+}
+
+// use trait as return type
+pub fn returns_summarizable() -> impl Summary {
+    Tweet {
+        username: String::from("horse_ebooks"),
+        content: String::from("of course, as you probably already know, people"),
+        reply: false,
+        retweet: false,
+    }
+}
