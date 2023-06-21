@@ -4,7 +4,6 @@
 // use crate::pig_latin::pig_latin::convert_word_gpt;
 // use std::time::Instant;
 use crate::employees::employees::start_cli;
-
 // tells root about the directory averages
 pub mod averages;
 pub mod employees;

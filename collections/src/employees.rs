@@ -37,6 +37,7 @@ pub mod employees {
         return Ok("print".to_string());
     }
 
+    // handles error checking
     pub fn parse_command(command: &Vec<&str>) -> Result<String, String> {
         let command_zero = command[0].to_lowercase();
 
